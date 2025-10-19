@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Medicine History | Sehat Pulse</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Sidebar + Menu -->
+  <div id="sidebar" class="sidebar">
+    <div class="menu-header">☰ Menu</div>
+    <ul>
+      <li onclick="navigate('dashboard.html')">🏠 Dashboard</li>
+      <li onclick="navigate('history.html')">💊 Medicine History</li>
+      <li onclick="navigate('chatbot.html')">🤖 Chatbot</li>
+      <li onclick="window.open('https://calendar.google.com', '_blank')">📅 Google Calendar</li>
+    </ul>
+  </div>
+  <div id="menuBtn" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">⋮</div>
+
+  <main style="margin:60px; color:#c1bfbf;">
+    <h2>💊 Medicine History (Last 10)</h2>
+    <div id="historyList"></div>
+  </main>
+
+ <script src="shared.js"></script>
+<script src="script.js"></script>
+<script>
+  async function loadMedicineHistory() {
+    const token = getToken();
+    if (!token) {
+      alert("Please login first.");
+      return (window.location.href = "index.html");
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/logs/history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      const historyList = document.getElementById("historyList");
+
+      if (data.length === 0) {
+        historyList.innerHTML = "<p class='muted-2'>No history yet.</p>";
+        return;
+      }
+
+      const recent = data.slice(-10).reverse();
+      historyList.innerHTML = recent
+        .map(l => `
+          <div class="history-item">
+            <strong>${l.scheduleRef}</strong> - ${l.status}
+            <div class="tiny muted-2">${new Date(l.timestamp).toLocaleString()}</div>
+          </div>`)
+        .join("");
+    } catch (err) {
+      console.error("History error:", err);
+      alert("Failed to load medicine history.");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadMedicineHistory);
+</script>
+
+  
+</body>
+</html>

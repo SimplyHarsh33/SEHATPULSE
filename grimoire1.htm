@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sehat Pulse</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================= AUTH SECTION ================= -->
+  <div id="auth-section" class="container">
+    <header>
+      <h1>Sehat Pulse</h1>
+      <p class="brand-sub">Login or Register to continue</p>
+    </header>
+
+    <div class="grid cols-2">
+      <!-- REGISTER -->
+      <div class="card">
+        <h2>Register</h2>
+        <input type="text" id="reg-name" placeholder="Name">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-password" placeholder="Password">
+        <button class="btn" onclick="registerUser(
+          document.getElementById('reg-name').value,
+          document.getElementById('reg-email').value,
+          document.getElementById('reg-password').value
+        )">Register</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="card">
+        <h2>Login</h2>
+        <input type="email" id="log-email" placeholder="Email">
+        <input type="password" id="log-password" placeholder="Password">
+        <button class="btn" onclick="loginUser(
+          document.getElementById('log-email').value,
+          document.getElementById('log-password').value
+        )">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DASHBOARD SECTION ================= -->
+  <div id="dashboard-section" style="display:none;">
+    <div class="container">
+      <header>
+        <div>
+          <h1>Sehat Pulse <span class="brand-sub">— Grimoire</span></h1>
+          <div class="brand-sub tiny">Medicine scheduling & simple reminders</div>
+        </div>
+        <div class="h-stack">
+          <button id="importBtn" class="btn-ghost small-cta"></button>
+          <button id="exportBtn" class="btn-ghost small-cta"></button>
+          <button class="btn small-cta" onclick="logout()">Logout</button>
+        </div>
+      </header>
+
+      <main class="grid cols-2">
+        <section class="card">
+          <div class="spaced" style="display:flex;align-items:center;gap:12px;">
+            <div>
+              <h2 style="margin:0">Medicine Scheduler</h2>
+              <div class="muted-2 tiny">Add and manage medicine reminders — works offline (localStorage)</div>
+            </div>
+            <div class="tag tiny" id="notificationStatus">Notifications: unknown</div>
+          </div>
+
+          <form id="scheduleForm" style="margin-top:12px">
+            <div style="display:grid;grid-template-columns:1fr 120px;gap:10px">
+              <div>
+                <label for="name">Medicine / Pill name</label>
+                <input id="name" type="text" placeholder="e.g., Paracetamol" required />
+              </div>
+              <div>
+                <label for="dose">Dose</label>
+                <input id="dose" type="text" placeholder="e.g., 500 mg" />
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+              <div>
+                <label for="time">Time</label>
+                <input id="time" type="time" required />
+              </div>
+              <div>
+                <label for="freq">Frequency</label>
+                <select id="freq">
+                  <option value="once">Once</option>
+                  <option value="daily" selected>Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="custom">Custom (days)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="customDaysWrap" class="hidden" style="margin-top:10px">
+              <label for="customDays">Days (0=Sunday,1=Monday,... comma separated)</label>
+              <input id="customDays" type="text" placeholder="e.g., 1,3,5" />
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+              <button class="btn" id="saveBtn" type="submit">Save Reminder</button>
+              <button id="clearBtn" type="button" class="btn-ghost">Clear Form</button>
+              <div style="flex:1"></div>
+              <div class="muted-2 tiny">Local only — no server</div>
+            </div>
+          </form>
+
+          <div style="margin-top:16px">
+            <h3 style="margin:0 0 8px 0">Upcoming reminders</h3>
+            <div id="list" class="list"></div>
+          </div>
+
+          <footer>
+            Tip: Allow browser notifications for timely reminders. You can export backups and import on another device.
+          </footer>
+        </section>
+
+        <aside class="card">
+          <h3 style="margin-top:0">Quick Actions</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+            <button id="notifyTest" class="btn">Send Test Notification</button>
+            <button id="clearAll" class="btn-ghost">Delete All Reminders</button>
+          </div>
+
+          <div style="margin-top:16px">
+            <h4 style="margin:6px 0">Stats</h4>
+            <div class="muted-2">Total Reminders: <strong id="statCount">0</strong></div>
+            <div class="muted-2" style="margin-top:8px">Next reminder: <span id="nextReminder">—</span></div>
+          </div>
+
+          <div style="margin-top:18px">
+            <h4 style="margin:6px 0">Taken / Missed</h4>
+            <div class="muted-2 tiny">Click the check icon to mark taken. Items stay in history until deleted.</div>
+            <div id="history" class="list" style="margin-top:8px"></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+  <!-- ========= MENU BUTTON ========= -->
+<div class="menu-btn" id="menuBtn">⋮</div>
+
+<!-- ========= SLIDE SIDEBAR ========= -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>Sehat Pulse</h2>
+    <span id="closeSidebar">✖</span>
+  </div>
+  <ul class="sidebar-links">
+    <li><a href="http://127.0.0.1:5500/Frontend/dashboard.html" id="navDashboard">🏠 Dashboard</a></li>
+    <li><a href="http://127.0.0.1:5500/Frontend/history.html" id="navHistory">💊 Medicine History</a></li>
+    <li><a href="#" id="navChatbot">🤖 Chatbot</a></li>
+    <li><a href="https://calendar.google.com" target="_blank">📅 Google Calendar</a></li>
+  </ul>
+</div>
+<!-- Place inside #dashboard-section -->
+<!-- SIDEBAR -->
+" />
+
+  <script src="script.js"></script>
+</body>
+</html>

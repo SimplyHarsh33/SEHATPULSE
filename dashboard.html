@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard | Sehat Pulse</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    
+  </style>
+</head>
+<body>
+  <!-- Sidebar + Menu -->
+  <div id="sidebar" class="sidebar">
+    <div class="menu-header">☰ Menu</div>
+    <ul>
+      <li onclick="navigate('dashboard.html')">🏠 Dashboard</li>
+      <li onclick="navigate('history.html')">💊 Medicine History</li>
+      <li onclick="navigate('chatbot.html')">🤖 Chatbot</li>
+      <li onclick="window.open('https://calendar.google.com', '_blank')">📅 Google Calendar</li>
+    </ul>
+  </div>
+  <div id="menuBtn" style="position:absolute; top:10px; right:15px; font-size:22px; cursor:pointer;">⋮</div>
+
+  <main style="margin:60px; color:#c6c1c1;">
+    <h2>📊 Dashboard</h2>
+    <div id="userStats"></div>
+    <div id="currentMeds" style="margin-top:20px;"></div>
+  </main>
+
+  
+ 
+<script>
+  async function loadDashboardStats() {
+    const token = getToken();
+    if (!token) {
+      alert("Please login first.");
+      return (window.location.href = "index.html");
+    }
+
+    try {
+      const [sRes, lRes] = await Promise.all([
+        fetch(`${BASE_URL}/api/schedules`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${BASE_URL}/api/logs/history`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+
+      const schedules = await sRes.json();
+      const logs = await lRes.json();
+
+      const total = schedules.length;
+      const taken = logs.filter(l => l.status === "taken").length;
+      const percent = total ? Math.round((taken / total) * 100) : 0;
+
+      document.getElementById("userStats").innerHTML = `
+        <p>Total Medicines: ${total}</p>
+        <p>Success Rate: ${percent}%</p>
+      `;
+
+      const meds = schedules.map(s => `<li>${s.name} (${s.dosage || ""}) - ${s.time}</li>`).join("");
+      document.getElementById("currentMeds").innerHTML =
+        `<h4>Current Medicines</h4><ul>${meds || "<i>No medicines yet.</i>"}</ul>`;
+    } catch (err) {
+      console.error("Dashboard error:", err);
+      alert("Error loading dashboard data.");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadDashboardStats);
+</script>
+
+  <script src="shared.js"></script>
+ <script src="script.js"></script>
+
+</body>
+</html>
